@@ -23,10 +23,48 @@
       overflow-y: auto;
       border: 3px solid lime;
     }
+    #choice-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      gap: 20px;
+      z-index: 9999;
+    }
+    .choice-btn {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border: 3px solid white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #btn-orange {
+      background: orange;
+      color: white;
+    }
+    #btn-orange:hover {
+      background: darkorange;
+      transform: scale(1.1);
+    }
+    #btn-watermelon {
+      background: #ff1744;
+      color: white;
+    }
+    #btn-watermelon:hover {
+      background: #c51162;
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
   <div id="log">Starting...</div>
+  <div id="choice-buttons">
+    <button id="btn-orange" class="choice-btn">🍊 Orange</button>
+    <button id="btn-watermelon" class="choice-btn">🍉 Watermelon</button>
+  </div>
 
   <a-scene
     embedded
@@ -38,6 +76,8 @@
       <a-asset-item id="capy" src="models/capybara_low_poly.glb"></a-asset-item>
       <a-asset-item id="watermelon" src="models/watermelon.glb"></a-asset-item>
       <a-asset-item id="slice" src="models/slice_of_watermelon.glb"></a-asset-item>
+      <a-asset-item id="orange" src="models/orange.glb"></a-asset-item>
+      <a-asset-item id="orange_slice" src="models/orange_slice.glb"></a-asset-item>
     </a-assets>
 
     <!-- LIGHTS for 3D models -->
@@ -50,9 +90,9 @@
       url="markers/jungle"
       id="jungle-marker"
       smooth="true"
-      smoothCount="10"
-      smoothTolerance="0.01"
-      smoothThreshold="5">
+      smoothCount="5"
+      smoothTolerance="0.5"
+      smoothThreshold="2">
       
       <!-- CAPYBARA 3D MODEL -->
       <a-entity position="100 100 -100" rotation="-90 0 0">
@@ -74,7 +114,7 @@
       </a-text>
     </a-nft>
 
-    <!-- DESK MARKER - WATERMELON -->
+    <!-- DESK MARKER - WATERMELON & ORANGE CHOICE -->
     <a-nft
       type="nft"
       url="markers/desk"
@@ -84,8 +124,8 @@
       smoothTolerance="0.01"
       smoothThreshold="5">
       
-      <!-- WATERMELON 3D MODEL -->
-      <a-entity position="150 200 -300" rotation="-90 0 0" id="desk-model">
+      <!-- WATERMELON 3D MODEL (LEFT) -->
+      <a-entity position="125 200 -300" rotation="-90 0 0" id="watermelon-choice" class="clickable">
         <a-entity 
           gltf-model="#watermelon"
           scale="150 150 150"
@@ -94,13 +134,23 @@
         </a-entity>
       </a-entity>
       
-      <!-- TEXT - SUCCESS -->
+      <!-- ORANGE 3D MODEL (RIGHT) -->
+      <a-entity position="175 200 -300" rotation="-90 0 0" id="orange-choice" class="clickable">
+        <a-entity 
+          gltf-model="#orange"
+          scale="150 150 150"
+          rotation="0 0 0"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
+        </a-entity>
+      </a-entity>
+      
+      <!-- TEXT - CHOICE -->
       <a-text
-        id="desk-text-success"
-        value="Wow, this melon looks amazing!"
+        id="desk-text-choice"
+        value="Ohhh I have to choose from Orange and Watermelon help me!"
         align="center"
-        color="#00ff00"
-        position="150 300 -300"
+        color="#ffff00"
+        position="275 300 -300"
         scale="50 50 50"
         visible="false">
       </a-text>
@@ -117,7 +167,7 @@
       </a-text>
     </a-nft>
 
-    <!-- PICNIC MARKER - CAPYBARA + WATERMELON SLICE -->
+    <!-- PICNIC MARKER - CAPYBARA + CHOSEN FRUIT SLICE -->
     <a-nft
       type="nft"
       url="markers/picnic"
@@ -138,12 +188,22 @@
         visible="false">
       </a-entity>
       
-      <!-- WATERMELON SLICE -->
+      <!-- WATERMELON SLICE (if chosen) -->
       <a-entity 
-        id="picnic-slice"
+        id="picnic-watermelon-slice"
         gltf-model="#slice" 
         position="50 -300 0" 
         scale="30 30 30" 
+        rotation="0 90 -90"
+        visible="false">
+      </a-entity>
+      
+      <!-- ORANGE SLICE (if chosen) -->
+      <a-entity 
+        id="picnic-orange-slice"
+        gltf-model="#orange_slice" 
+        position="50 -300 0" 
+        scale="60 60 60" 
         rotation="0 90 -90"
         visible="false">
       </a-entity>
@@ -185,6 +245,14 @@
       picnic: false
     };
     
+    // FRUIT CHOICE TRACKING
+    let chosenFruit = null; // 'watermelon' or 'orange'
+    
+    // Get choice buttons
+    const choiceButtons = document.getElementById('choice-buttons');
+    const btnOrange = document.getElementById('btn-orange');
+    const btnWatermelon = document.getElementById('btn-watermelon');
+    
     function log(msg) {
       console.log(msg);
       const time = new Date().toLocaleTimeString();
@@ -211,57 +279,118 @@
         });
       }
 
-      // DESK (SECOND - requires jungle)
+      // DESK (SECOND - requires jungle) - CHOICE BETWEEN WATERMELON AND ORANGE
       const deskMarker = document.getElementById('desk-marker');
-      const deskModel = document.getElementById('desk-model');
+      const watermelonChoice = document.getElementById('watermelon-choice');
+      const orangeChoice = document.getElementById('orange-choice');
+      const deskTextChoice = document.getElementById('desk-text-choice');
+      const deskTextBlocked = document.getElementById('desk-text-blocked');
       
       if (deskMarker) {
         deskMarker.addEventListener('markerFound', () => {
           if (!scannedMarkers.jungle) {
             // BLOCKED
-            if (deskModel) deskModel.setAttribute('visible', 'false');
+            if (watermelonChoice) watermelonChoice.setAttribute('visible', 'false');
+            if (orangeChoice) orangeChoice.setAttribute('visible', 'false');
+            if (deskTextChoice) deskTextChoice.setAttribute('visible', 'false');
+            if (deskTextBlocked) deskTextBlocked.setAttribute('visible', 'true');
             log('⛔ Scan Jungle marker first!');
             logDiv.style.borderColor = 'orange';
             return;
           }
-          // SUCCESS
-          scannedMarkers.desk = true;
-          if (deskModel) deskModel.setAttribute('visible', 'true');
-          log('🟩 Capybara: "Wow, this melon looks amazing!"');
-          logDiv.style.borderColor = 'green';
+          // SUCCESS - Show choice
+          if (watermelonChoice) watermelonChoice.setAttribute('visible', 'true');
+          if (orangeChoice) orangeChoice.setAttribute('visible', 'true');
+          if (deskTextChoice) deskTextChoice.setAttribute('visible', 'true');
+          if (deskTextBlocked) deskTextBlocked.setAttribute('visible', 'false');
+          
+          // Show choice buttons
+          if (!chosenFruit) {
+            choiceButtons.style.display = 'flex';
+            log('🟩 Capybara: "Ohhh I have to choose from Orange and Watermelon help me!"');
+          } else {
+            log('🟩 You already chose ' + chosenFruit.toUpperCase());
+          }
+          logDiv.style.borderColor = 'yellow';
         });
         deskMarker.addEventListener('markerLost', () => {
-          if (deskModel) deskModel.setAttribute('visible', 'false');
+          if (watermelonChoice) watermelonChoice.setAttribute('visible', 'false');
+          if (orangeChoice) orangeChoice.setAttribute('visible', 'false');
+          if (deskTextChoice) deskTextChoice.setAttribute('visible', 'false');
+          if (deskTextBlocked) deskTextBlocked.setAttribute('visible', 'false');
+          choiceButtons.style.display = 'none';
           log('Marker lost');
           logDiv.style.borderColor = 'lime';
         });
       }
+      
+      // BUTTON CLICK HANDLERS FOR FRUIT CHOICE
+      if (btnWatermelon) {
+        btnWatermelon.addEventListener('click', () => {
+          chosenFruit = 'watermelon';
+          scannedMarkers.desk = true;
+          choiceButtons.style.display = 'none';
+          log('✅ You chose WATERMELON! 🍉');
+          logDiv.style.borderColor = 'green';
+        });
+      }
+      
+      if (btnOrange) {
+        btnOrange.addEventListener('click', () => {
+          chosenFruit = 'orange';
+          scannedMarkers.desk = true;
+          choiceButtons.style.display = 'none';
+          log('✅ You chose ORANGE! 🍊');
+          logDiv.style.borderColor = 'orange';
+        });
+      }
 
-      // PICNIC (THIRD - requires jungle AND desk)
+      // PICNIC (THIRD - requires jungle AND desk choice)
       const picnicMarker = document.getElementById('picnic-marker');
       const picnicCapy = document.getElementById('picnic-capy');
-      const picnicSlice = document.getElementById('picnic-slice');
+      const picnicWatermelonSlice = document.getElementById('picnic-watermelon-slice');
+      const picnicOrangeSlice = document.getElementById('picnic-orange-slice');
+      const picnicTextSuccess = document.getElementById('picnic-text-success');
+      const picnicTextBlocked = document.getElementById('picnic-text-blocked');
       
       if (picnicMarker) {
         picnicMarker.addEventListener('markerFound', () => {
-          if (!scannedMarkers.jungle || !scannedMarkers.desk) {
+          if (!scannedMarkers.jungle || !scannedMarkers.desk || !chosenFruit) {
             // BLOCKED
             if (picnicCapy) picnicCapy.setAttribute('visible', 'false');
-            if (picnicSlice) picnicSlice.setAttribute('visible', 'false');
-            log('⛔ Scan Jungle and Desk markers first!');
+            if (picnicWatermelonSlice) picnicWatermelonSlice.setAttribute('visible', 'false');
+            if (picnicOrangeSlice) picnicOrangeSlice.setAttribute('visible', 'false');
+            if (picnicTextSuccess) picnicTextSuccess.setAttribute('visible', 'false');
+            if (picnicTextBlocked) picnicTextBlocked.setAttribute('visible', 'true');
+            log('⛔ Scan Jungle and choose a fruit on Desk first!');
             logDiv.style.borderColor = 'orange';
             return;
           }
-          // SUCCESS
+          // SUCCESS - Show capybara with chosen fruit
           scannedMarkers.picnic = true;
           if (picnicCapy) picnicCapy.setAttribute('visible', 'true');
-          if (picnicSlice) picnicSlice.setAttribute('visible', 'true');
-          log('🟦 Capybara: "Thank you, now I\'m happy!"');
+          if (picnicTextSuccess) picnicTextSuccess.setAttribute('visible', 'true');
+          if (picnicTextBlocked) picnicTextBlocked.setAttribute('visible', 'false');
+          
+          // IF-ELSE: Show chosen fruit slice
+          if (chosenFruit === 'watermelon') {
+            if (picnicWatermelonSlice) picnicWatermelonSlice.setAttribute('visible', 'true');
+            if (picnicOrangeSlice) picnicOrangeSlice.setAttribute('visible', 'false');
+            log('🟦 Capybara: "Thank you, now I\'m happy!" (with watermelon)');
+          } else if (chosenFruit === 'orange') {
+            if (picnicOrangeSlice) picnicOrangeSlice.setAttribute('visible', 'true');
+            if (picnicWatermelonSlice) picnicWatermelonSlice.setAttribute('visible', 'false');
+            log('🟦 Capybara: "Thank you, now I\'m happy!" (with orange)');
+          }
+          
           logDiv.style.borderColor = 'blue';
         });
         picnicMarker.addEventListener('markerLost', () => {
           if (picnicCapy) picnicCapy.setAttribute('visible', 'false');
-          if (picnicSlice) picnicSlice.setAttribute('visible', 'false');
+          if (picnicWatermelonSlice) picnicWatermelonSlice.setAttribute('visible', 'false');
+          if (picnicOrangeSlice) picnicOrangeSlice.setAttribute('visible', 'false');
+          if (picnicTextSuccess) picnicTextSuccess.setAttribute('visible', 'false');
+          if (picnicTextBlocked) picnicTextBlocked.setAttribute('visible', 'false');
           log('Marker lost');
           logDiv.style.borderColor = 'lime';
         });
