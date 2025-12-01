@@ -33,7 +33,18 @@
     vr-mode-ui="enabled: false"
     arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
     
-    <!-- JUNGLE MARKER - RED BOX -->
+    <!-- Load 3D Models -->
+    <a-assets>
+      <a-asset-item id="capy" src="models/capybara_low_poly.glb"></a-asset-item>
+      <a-asset-item id="watermelon" src="models/watermelon.glb"></a-asset-item>
+      <a-asset-item id="slice" src="models/slice_of_watermelon.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- LIGHTS for 3D models -->
+    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
+    
+    <!-- JUNGLE MARKER - CAPYBARA -->
     <a-nft
       type="nft"
       url="markers/jungle"
@@ -43,25 +54,26 @@
       smoothTolerance="0.01"
       smoothThreshold="5">
       
-      <!-- MASSIVE RED BOX - 5x bigger -->
-      <a-box 
-        position="0 50 0" 
-        material="color: #ff0000;" 
-        scale="10 10 10"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
-      </a-box>
+      <!-- CAPYBARA 3D MODEL -->
+      <a-entity 
+        gltf-model="#capy"
+        position="0 40 0" 
+        scale="60 60 60"
+        rotation="0 0 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear">
+      </a-entity>
       
-      <!-- BIG TEXT -->
+      <!-- TEXT -->
       <a-text
         value="Oh no... I'm hungry!"
         align="center"
-        color="yellow"
+        color="#ff0000"
         position="0 65 0"
-        scale="25 25 25">
+        scale="20 20 20">
       </a-text>
     </a-nft>
 
-    <!-- DESK MARKER - GREEN SPHERE -->
+    <!-- DESK MARKER - WATERMELON -->
     <a-nft
       type="nft"
       url="markers/desk"
@@ -71,25 +83,26 @@
       smoothTolerance="0.01"
       smoothThreshold="5">
       
-      <!-- MASSIVE GREEN SPHERE - 5x bigger -->
-      <a-sphere 
-        position="0 50 0" 
-        material="color: #00ff00;" 
-        radius="5"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
-      </a-sphere>
+      <!-- WATERMELON 3D MODEL -->
+      <a-entity 
+        gltf-model="#watermelon"
+        position="0 40 0" 
+        scale="50 50 50"
+        rotation="0 0 0"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
+      </a-entity>
       
-      <!-- BIG TEXT -->
+      <!-- TEXT -->
       <a-text
         value="Wow, this melon looks amazing!"
         align="center"
-        color="white"
+        color="#00ff00"
         position="0 65 0"
-        scale="25 25 25">
+        scale="20 20 20">
       </a-text>
     </a-nft>
 
-    <!-- PICNIC MARKER - BLUE CYLINDER -->
+    <!-- PICNIC MARKER - HAPPY CAPYBARA + WATERMELON SLICE -->
     <a-nft
       type="nft"
       url="markers/picnic"
@@ -99,22 +112,31 @@
       smoothTolerance="0.01"
       smoothThreshold="5">
       
-      <!-- MASSIVE BLUE CYLINDER - 5x bigger -->
-      <a-cylinder 
-        position="0 50 0" 
-        material="color: #0088ff;" 
-        height="10"
-        radius="4"
-        animation="property: position; dir: alternate; dur: 600; loop: true; to: 0 55 0; from: 0 50 0; easing: easeInOutQuad">
-      </a-cylinder>
+      <!-- HAPPY CAPYBARA (bouncing) -->
+      <a-entity 
+        gltf-model="#capy"
+        position="-15 40 0" 
+        scale="60 60 60"
+        rotation="0 0 0"
+        animation="property: position; dir: alternate; dur: 600; loop: true; to: -15 45 0; from: -15 40 0; easing: easeInOutQuad">
+      </a-entity>
+
+      <!-- WATERMELON SLICE -->
+      <a-entity 
+        gltf-model="#slice"
+        position="15 40 0" 
+        scale="40 40 40"
+        rotation="0 90 0"
+        animation="property: rotation; to: 0 450 0; loop: true; dur: 9000; easing: linear">
+      </a-entity>
       
-      <!-- BIG TEXT -->
+      <!-- TEXT -->
       <a-text
         value="Thank you, now I'm happy!"
         align="center"
-        color="cyan"
+        color="#00ffff"
         position="0 70 0"
-        scale="25 25 25">
+        scale="20 20 20">
       </a-text>
     </a-nft>
 
@@ -155,14 +177,22 @@
       log('4. Rendering started');
     });
 
+    // Check if models loaded
+    const assets = document.querySelector('a-assets');
+    if (assets) {
+      assets.addEventListener('loaded', () => {
+        log('5. All 3D models loaded ✓');
+      });
+    }
+
     // Get all markers
     setTimeout(() => {
       // JUNGLE
       const jungleMarker = document.getElementById('jungle-marker');
       if (jungleMarker) {
-        log('5. Jungle marker ready');
+        log('6. Jungle marker ready');
         jungleMarker.addEventListener('markerFound', () => {
-          log('🟥 JUNGLE FOUND! Red box');
+          log('🟥 JUNGLE FOUND! Capybara');
           logDiv.style.borderColor = 'red';
         });
         jungleMarker.addEventListener('markerLost', () => {
@@ -174,9 +204,9 @@
       // DESK
       const deskMarker = document.getElementById('desk-marker');
       if (deskMarker) {
-        log('6. Desk marker ready');
+        log('7. Desk marker ready');
         deskMarker.addEventListener('markerFound', () => {
-          log('🟩 DESK FOUND! Green sphere');
+          log('🟩 DESK FOUND! Watermelon');
           logDiv.style.borderColor = 'green';
         });
         deskMarker.addEventListener('markerLost', () => {
@@ -188,9 +218,9 @@
       // PICNIC
       const picnicMarker = document.getElementById('picnic-marker');
       if (picnicMarker) {
-        log('7. Picnic marker ready');
+        log('8. Picnic marker ready');
         picnicMarker.addEventListener('markerFound', () => {
-          log('🟦 PICNIC FOUND! Blue cylinder');
+          log('🟦 PICNIC FOUND! Happy Capy + Slice');
           logDiv.style.borderColor = 'blue';
         });
         picnicMarker.addEventListener('markerLost', () => {
