@@ -1,7 +1,37 @@
 <!doctype html>
 <html lang="ro">
 <head>
-  <meta charset="utf-8" />
+  <met    <!-- === MARKER: JUNGLE (marker folder: markers/jungle.{fset,fset3,        <!-- slice of watermelon -->
+        <a-entity id="slice-entity"
+                  gltf-model="#slice"
+                  scale="1 1 1"
+                  position="0.3 0 0"
+                  rotation="0 90 0"
+                  visible="false">
+        </a-entity>
+
+        <a-entity id="text-picnic"
+                  text="value: Thank you, now I'm happy!; align:center; width:3; wrapCount:28; color:#0088ff"
+                  position="0 1.8 0"
+                  visible="false">  <a-nft type="nft" url="markers/jungle" id="marker-jungle" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
+      <a-entity id="jungle-root" visible="false">
+        <!-- capybara (rotating) -->
+        <a-entity id="capy-jungle"
+                  gltf-model="#capy"
+                  scale="1.5 1.5 1.5"
+                  position="0 0 0"
+                  rotation="0 0 0"
+                  visible="false">
+        </a-entity>
+
+        <!-- text -->
+        <a-entity id="text-jungle"
+                  text="value: Oh no… I'm hungry!; align:center; width:3; wrapCount:28; color:#ff0000"
+                  position="0 1.5 0"
+                  visible="false">
+        </a-entity>
+      </a-entity>
+    </a-nft>
   <title>AR Interaction Lab — Story Capybara</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
@@ -45,12 +75,12 @@
     <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
 
     <!-- === MARKER: JUNGLE (marker folder: markers/jungle.{fset,fset3,iset}) -->
-    <a-nft type="nft" url="markers/jungle" id="marker-jungle" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
+    <a-nft type="nft" url="markers/jungle" id="marker-jungle">
       <a-entity id="jungle-root" visible="false">
         <!-- capybara (rotating) -->
         <a-entity id="capy-jungle"
                   gltf-model="#capy"
-                  scale="1.5 1.5 1.5"
+                  scale="0.6 0.6 0.6"
                   position="0 0 0"
                   rotation="0 0 0"
                   visible="false">
@@ -58,8 +88,8 @@
 
         <!-- text -->
         <a-entity id="text-jungle"
-                  text="value: Oh no… I'm hungry!; align:center; width:3; wrapCount:28; color:#ff0000"
-                  position="0 1.5 0"
+                  text="value: Oh no… I’m hungry!; align:center; width:2.8; wrapCount:28"
+                  position="0 0.9 0"
                   visible="false">
         </a-entity>
       </a-entity>
@@ -99,15 +129,15 @@
         <!-- slice of watermelon -->
         <a-entity id="slice-entity"
                   gltf-model="#slice"
-                  scale="1 1 1"
-                  position="0.3 0 0"
+                  scale="0.5 0.5 0.5"
+                  position="0 -0.15 0.25"
                   rotation="0 90 0"
                   visible="false">
         </a-entity>
 
         <a-entity id="text-picnic"
-                  text="value: Thank you, now I'm happy!; align:center; width:3; wrapCount:28; color:#0088ff"
-                  position="0 1.8 0"
+                  text="value: Thank you, now I’m happy!; align:center; width:2.8; wrapCount:28"
+                  position="0 1.0 0"
                   visible="false">
         </a-entity>
       </a-entity>
@@ -219,7 +249,7 @@
       // Make capy bounce (y-position animation)
       const c = document.querySelector('#capy-picnic');
       if (c) {
-        c.setAttribute('animation__bounce', 'property: position; dir: alternate; dur: 600; loop: true; to: -0.3 0.18 0; from: -0.3 0 0; easing: easeInOutQuad');
+        c.setAttribute('animation__bounce', 'property: position; dir: alternate; dur: 600; loop: true; to: 0 0.18 0; from: 0 0 0; easing: easeInOutQuad');
       }
 
       // Option: spin the slice slowly
@@ -240,7 +270,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'r') {
         jungleSeen = false; melonSeen = false;
-        log('States reset: jungleSeen=false, melonSeen=false');
+        console.log('States reset: jungleSeen=false, melonSeen=false');
         // hide everything
         ['#jungle-root','#desk-root','#picnic-root'].forEach(hideEntity);
       }
