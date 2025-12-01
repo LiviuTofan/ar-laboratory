@@ -1,250 +1,214 @@
-<!doctype html>
-<html lang="ro">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <title>AR Interaction Lab — Story Capybara</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-
-  <!-- A-Frame -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>AR Debug - Simple Test</title>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- AR.js (A-Frame NFT support) -->
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
-
   <style>
-    body { margin:0; overflow:hidden; font-family:system-ui,Segoe UI,Roboto,sans-serif }
-    .info {
-      position: absolute; left: 12px; top: 12px; z-index: 20;
-      background: rgba(255,255,255,0.9); padding:8px 12px; border-radius:8px; font-weight:600;
-    }
-    #debug-log {
-      position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 20;
-      background: rgba(0,0,0,0.8); color: #0f0; padding: 8px; 
-      border-radius: 4px; font-size: 10px; max-height: 150px; overflow-y: auto;
+    body { margin: 0; overflow: hidden; }
+    #log {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.9);
+      color: lime;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 14px;
+      z-index: 9999;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 3px solid lime;
     }
   </style>
 </head>
 <body>
-  <div class="info">Scan markers in order: <strong>Jungle → Desk → Picnic</strong></div>
-  <div id="debug-log">Initializing AR...</div>
+  <div id="log">Starting...</div>
 
   <a-scene
     embedded
-    vr-mode-ui="enabled:false"
-    renderer="colorManagement: true; physicallyCorrectLights: true"
-    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3">
-
-    <a-assets>
-      <!-- modele: pune fișierele .glb în folderul models/ -->
-      <a-asset-item id="capy" src="models/capybara_low_poly.glb"></a-asset-item>
-      <a-asset-item id="watermelon" src="models/watermelon.glb"></a-asset-item>
-      <a-asset-item id="slice" src="models/slice_of_watermelon.glb"></a-asset-item>
-    </a-assets>
-
-    <!-- LIGHTS -->
-    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-    <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
-
-    <!-- === MARKER: JUNGLE (marker folder: markers/jungle.{fset,fset3,iset}) -->
-    <a-nft type="nft" url="markers/jungle" id="marker-jungle" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-      <a-entity id="jungle-root" visible="false">
-        <!-- capybara (rotating) -->
-        <a-entity id="capy-jungle"
-                  gltf-model="#capy"
-                  scale="1.5 1.5 1.5"
-                  position="0 0 0"
-                  rotation="0 0 0"
-                  visible="false">
-        </a-entity>
-
-        <!-- text -->
-        <a-entity id="text-jungle"
-                  text="value: Oh no… I'm hungry!; align:center; width:3; wrapCount:28; color:#ff0000"
-                  position="0 1.5 0"
-                  visible="false">
-        </a-entity>
-      </a-entity>
+    vr-mode-ui="enabled: false"
+    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+    
+    <!-- JUNGLE MARKER - RED BOX -->
+    <a-nft
+      type="nft"
+      url="markers/jungle"
+      id="jungle-marker"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5">
+      
+      <!-- MASSIVE RED BOX - 5x bigger -->
+      <a-box 
+        position="0 50 0" 
+        material="color: #ff0000;" 
+        scale="10 10 10"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+      </a-box>
+      
+      <!-- BIG TEXT -->
+      <a-text
+        value="Oh no... I'm hungry!"
+        align="center"
+        color="yellow"
+        position="0 65 0"
+        scale="25 25 25">
+      </a-text>
     </a-nft>
 
-    <!-- === MARKER: DESK/MASA (markers/desk.*) -->
-    <a-nft type="nft" url="markers/desk" id="marker-desk" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-      <a-entity id="desk-root" visible="false">
-        <a-entity id="watermelon-entity"
-                  gltf-model="#watermelon"
-                  scale="1.2 1.2 1.2"
-                  position="0 0 0"
-                  rotation="0 0 0"
-                  visible="false">
-        </a-entity>
-
-        <a-entity id="text-desk"
-                  text="value: Wow, this melon looks amazing!; align:center; width:3; wrapCount:28; color:#00ff00"
-                  position="0 1.5 0"
-                  visible="false">
-        </a-entity>
-      </a-entity>
+    <!-- DESK MARKER - GREEN SPHERE -->
+    <a-nft
+      type="nft"
+      url="markers/desk"
+      id="desk-marker"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5">
+      
+      <!-- MASSIVE GREEN SPHERE - 5x bigger -->
+      <a-sphere 
+        position="0 50 0" 
+        material="color: #00ff00;" 
+        radius="5"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
+      </a-sphere>
+      
+      <!-- BIG TEXT -->
+      <a-text
+        value="Wow, this melon looks amazing!"
+        align="center"
+        color="white"
+        position="0 65 0"
+        scale="25 25 25">
+      </a-text>
     </a-nft>
 
-    <!-- === MARKER: PICNIC (markers/picnic.*) -->
-    <a-nft type="nft" url="markers/picnic" id="marker-picnic" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-      <a-entity id="picnic-root" visible="false">
-        <!-- capybara happy bouncing -->
-        <a-entity id="capy-picnic"
-                  gltf-model="#capy"
-                  scale="1.5 1.5 1.5"
-                  position="-0.3 0 0"
-                  rotation="0 0 0"
-                  visible="false">
-        </a-entity>
-
-        <!-- slice of watermelon -->
-        <a-entity id="slice-entity"
-                  gltf-model="#slice"
-                  scale="1 1 1"
-                  position="0.3 0 0"
-                  rotation="0 90 0"
-                  visible="false">
-        </a-entity>
-
-        <a-entity id="text-picnic"
-                  text="value: Thank you, now I'm happy!; align:center; width:3; wrapCount:28; color:#0088ff"
-                  position="0 1.8 0"
-                  visible="false">
-        </a-entity>
-      </a-entity>
+    <!-- PICNIC MARKER - BLUE CYLINDER -->
+    <a-nft
+      type="nft"
+      url="markers/picnic"
+      id="picnic-marker"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5">
+      
+      <!-- MASSIVE BLUE CYLINDER - 5x bigger -->
+      <a-cylinder 
+        position="0 50 0" 
+        material="color: #0088ff;" 
+        height="10"
+        radius="4"
+        animation="property: position; dir: alternate; dur: 600; loop: true; to: 0 55 0; from: 0 50 0; easing: easeInOutQuad">
+      </a-cylinder>
+      
+      <!-- BIG TEXT -->
+      <a-text
+        value="Thank you, now I'm happy!"
+        align="center"
+        color="cyan"
+        position="0 70 0"
+        scale="25 25 25">
+      </a-text>
     </a-nft>
 
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // State
-    let jungleSeen = false;
-    let melonSeen  = false;
-
-    // Debug logger
+    const logDiv = document.getElementById('log');
+    let logs = [];
+    
     function log(msg) {
       console.log(msg);
-      const debugDiv = document.getElementById('debug-log');
-      if (debugDiv) {
-        debugDiv.innerHTML += '<br>' + msg;
-        debugDiv.scrollTop = debugDiv.scrollHeight;
-      }
+      const time = new Date().toLocaleTimeString();
+      logs.push(`[${time}] ${msg}`);
+      if (logs.length > 20) logs.shift();
+      logDiv.innerHTML = logs.join('<br>');
     }
 
-    // helpers to show/hide
-    function showEntity(sel){ const e = document.querySelector(sel); if(e) e.setAttribute('visible', 'true'); }
-    function hideEntity(sel){ const e = document.querySelector(sel); if(e) e.setAttribute('visible', 'false'); }
+    log('1. Page loaded');
 
-    // Log scene loaded
+    // Wait for scene to load
     const scene = document.querySelector('a-scene');
-    scene.addEventListener('loaded', () => {
-      log('AR.js Scene loaded ✓');
-    });
+    if (scene.hasLoaded) {
+      log('2. Scene already loaded');
+    } else {
+      scene.addEventListener('loaded', () => {
+        log('2. Scene loaded');
+      });
+    }
 
-    // Check for AR.js loading
+    // Camera video loaded
     scene.addEventListener('arjs-video-loaded', () => {
-      log('Camera video loaded ✓');
+      log('3. Camera video started ✓');
     });
 
-    // Jungle marker handlers
-    const mJ = document.getElementById('marker-jungle');
-    mJ.addEventListener('markerFound', () => {
-      log('🟥 JUNGLE MARKER FOUND!');
-      jungleSeen = true;
-      // show root
-      showEntity('#jungle-root');
-      // show capy and text
-      showEntity('#capy-jungle');
-      showEntity('#text-jungle');
-
-      // make capy rotate slowly (loop)
-      const capy = document.querySelector('#capy-jungle');
-      if (capy) {
-        capy.setAttribute('animation__spin', 'property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear');
-      }
-    });
-    mJ.addEventListener('markerLost', () => {
-      log('JUNGLE LOST (memory kept)');
-      // keep jungleSeen true (remembers that user scanned it)
-      // hide visuals
-      hideEntity('#capy-jungle');
-      hideEntity('#text-jungle');
-      hideEntity('#jungle-root');
+    // Rendering started
+    scene.addEventListener('renderstart', () => {
+      log('4. Rendering started');
     });
 
-    // Desk marker handlers (desk)
-    const mD = document.getElementById('marker-desk');
-    mD.addEventListener('markerFound', () => {
-      log('🟩 DESK MARKER FOUND!');
-      // Only show watermelon if jungle was seen
-      if (!jungleSeen) {
-        log('⚠️ BLOCKED: Scan Jungle first!');
-        return;
-      }
-      melonSeen = true;
-      log('✓ Showing watermelon');
-      showEntity('#desk-root');
-      showEntity('#watermelon-entity');
-      showEntity('#text-desk');
-
-      // slowly rotate the melon for effect
-      const melon = document.querySelector('#watermelon-entity');
-      if (melon) {
-        melon.setAttribute('animation__spin', 'property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear');
-      }
-    });
-    mD.addEventListener('markerLost', () => {
-      log('DESK LOST (memory kept)');
-      // keep melonSeen true (remembers)
-      hideEntity('#watermelon-entity');
-      hideEntity('#text-desk');
-      hideEntity('#desk-root');
-    });
-
-    // Picnic marker handlers
-    const mP = document.getElementById('marker-picnic');
-    mP.addEventListener('markerFound', () => {
-      log('🟦 PICNIC MARKER FOUND!');
-      // Only allow final scene if both previous markers were seen
-      if (!(jungleSeen && melonSeen)) {
-        log('⚠️ BLOCKED: Scan Jungle & Desk first!');
-        return;
-      }
-      log('✓ Happy ending!');
-      showEntity('#picnic-root');
-      showEntity('#capy-picnic');
-      showEntity('#slice-entity');
-      showEntity('#text-picnic');
-
-      // Make capy bounce (y-position animation)
-      const c = document.querySelector('#capy-picnic');
-      if (c) {
-        c.setAttribute('animation__bounce', 'property: position; dir: alternate; dur: 600; loop: true; to: -0.3 0.18 0; from: -0.3 0 0; easing: easeInOutQuad');
+    // Get all markers
+    setTimeout(() => {
+      // JUNGLE
+      const jungleMarker = document.getElementById('jungle-marker');
+      if (jungleMarker) {
+        log('5. Jungle marker ready');
+        jungleMarker.addEventListener('markerFound', () => {
+          log('🟥 JUNGLE FOUND! Red box');
+          logDiv.style.borderColor = 'red';
+        });
+        jungleMarker.addEventListener('markerLost', () => {
+          log('Jungle lost');
+          logDiv.style.borderColor = 'lime';
+        });
       }
 
-      // Option: spin the slice slowly
-      const s = document.querySelector('#slice-entity');
-      if (s) {
-        s.setAttribute('animation__spin', 'property: rotation; to: 0 360 0; loop: true; dur: 9000; easing: linear');
+      // DESK
+      const deskMarker = document.getElementById('desk-marker');
+      if (deskMarker) {
+        log('6. Desk marker ready');
+        deskMarker.addEventListener('markerFound', () => {
+          log('🟩 DESK FOUND! Green sphere');
+          logDiv.style.borderColor = 'green';
+        });
+        deskMarker.addEventListener('markerLost', () => {
+          log('Desk lost');
+          logDiv.style.borderColor = 'lime';
+        });
       }
-    });
-    mP.addEventListener('markerLost', () => {
-      log('PICNIC LOST');
-      hideEntity('#capy-picnic');
-      hideEntity('#slice-entity');
-      hideEntity('#text-picnic');
-      hideEntity('#picnic-root');
+
+      // PICNIC
+      const picnicMarker = document.getElementById('picnic-marker');
+      if (picnicMarker) {
+        log('7. Picnic marker ready');
+        picnicMarker.addEventListener('markerFound', () => {
+          log('🟦 PICNIC FOUND! Blue cylinder');
+          logDiv.style.borderColor = 'blue';
+        });
+        picnicMarker.addEventListener('markerLost', () => {
+          log('Picnic lost');
+          logDiv.style.borderColor = 'lime';
+        });
+      }
+    }, 2000);
+
+    // Log any errors
+    window.addEventListener('error', (e) => {
+      log('❌ ERROR: ' + e.message);
     });
 
-    // Small dev helper: press 'r' to reset states (for quick testing)
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'r') {
-        jungleSeen = false; melonSeen = false;
-        log('States reset: jungleSeen=false, melonSeen=false');
-        // hide everything
-        ['#jungle-root','#desk-root','#picnic-root'].forEach(hideEntity);
-      }
-    });
+    // Status check every 5 seconds
+    setInterval(() => {
+      log('Status: Camera running, waiting for marker...');
+    }, 5000);
   </script>
 </body>
 </html>
